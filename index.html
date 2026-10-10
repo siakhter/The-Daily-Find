@@ -104,7 +104,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
   </section>
 
   <section class="pane" id="pane-a">
-    <p class="note">Paste the code from Adsterra (Banner, Native Banner, Social Bar or Popunder). Banners and native ads show in a placement; Social Bar and Popunder scripts use "Site-wide script".</p>
+    <p class="note">Paste the code from Adsterra (Banner, Native Banner, Social Bar or Popunder). For a Smartlink, paste just the link (https://...): it shows as a "Sponsored" button, and the Name field becomes the button text. Banners and native ads show in a placement; Social Bar and Popunder scripts use "Site-wide script".</p>
     <form class="f" id="af">
       <input type="hidden" name="id">
       <label>Name<input name="name" required placeholder="Top banner 728x90"></label>
@@ -217,6 +217,8 @@ function adSize(ad){
   return {w,h};
 }
 function adFrame(ad){
+  let u=(ad.code||'').trim();if(/^\/\/\S+$/.test(u))u='https:'+u;if(/^https?:\/\/\S+\.js(\?\S*)?$/i.test(u)){ad={...ad,code:'<script async data-cfasync="false" src="'+u+'"><\/script>'};u='';}
+  if(/^https?:\/\/\S+$/i.test(u)){const a=document.createElement('a');a.className='btn';a.href=u;a.target='_blank';a.rel='sponsored nofollow noopener';a.textContent=ad.name||'Sponsored offer';const w=document.createElement('div');w.style.cssText='text-align:center;font-size:.75rem;color:var(--mute);padding:6px';w.append('Sponsored',document.createElement('br'),a);return w;}
   const {w,h}=adSize(ad);
   const f=document.createElement('iframe');
   f.title='Advertisement';f.loading='lazy';
