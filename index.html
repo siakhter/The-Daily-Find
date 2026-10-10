@@ -52,18 +52,7 @@ header{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc)
 header p{color:inherit;opacity:.9}
 .card{transition:transform .15s,box-shadow .15s}
 .card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.14)}
-.price{font-size:1.15rem;font-weight:700;color:var(--ink)}
-.was{color:var(--mute);font-weight:400;font-size:.9rem;margin-left:4px}
-header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;margin:0 0 12px;border-radius:0 0 16px 16px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
-header h1{font-size:1.5rem}
-header p{margin:0;font-size:.9rem}
-.card .img{aspect-ratio:1/1;position:relative}
-.card h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-family:inherit;font-size:.98rem;font-weight:600}
-.card .btn{background:var(--hi);color:#111;border-radius:99px}
-.badge{position:absolute;top:10px;left:10px;background:#d64545;color:#fff;font-weight:700;font-size:.8rem;padding:3px 8px;border-radius:6px}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px}
-.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font:inherit;font-size:.9rem;cursor:pointer}
-.chip.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.price{font-size:1.1rem;color:var(--acc)}
 .del{color:#d64545!important;border-color:#d64545!important}
 .dh{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
 .tabs{display:flex;gap:6px}
@@ -90,10 +79,8 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
   <div id="ad-top" class="adwrap"></div>
   <div class="bar">
     <input id="q" type="search" placeholder="Search products" aria-label="Search products">
-    <select id="cat" aria-label="Filter by category" hidden><option value="">All categories</option></select>
-    <select id="sort" aria-label="Sort"><option value="">Newest</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>
+    <select id="cat" aria-label="Filter by category"><option value="">All categories</option></select>
   </div>
-  <div id="chips" class="chips"></div>
   <main id="grid" class="grid" aria-live="polite"></main>
   <div id="ad-bottom" class="adwrap"></div>
   <footer>
@@ -122,7 +109,6 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
       <label>Image link<input name="image" placeholder="https://m.media-amazon.com/...jpg"></label>
       <label>Or upload a picture<input type="file" id="imgf" accept="image/*"><input type="hidden" name="imgdata"></label>
       <label>Price (optional)<input name="price" placeholder="$29.99"></label>
-      <label>Old price (optional, shows a discount badge)<input name="was" placeholder="$39.99"></label>
       <label>Category<input name="category" placeholder="Kitchen"></label>
       <label class="w">Short note<input name="desc" maxlength="160"></label>
       <div class="w"><button class="btn" type="submit">Save product</button> <button class="btn alt" type="reset" id="pr">Clear</button></div>
@@ -282,11 +268,8 @@ function render(){
   const sel=$('#cat'),cur=sel.value;
   sel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');
   sel.value=cats.includes(cur)?cur:'';
-  $('#chips').innerHTML=['',...cats].map(c=>`<button type="button" class="chip${sel.value===c?' on':''}" data-c="${esc(c)}">${c?esc(c):'All'}</button>`).join('');
   const q=$('#q').value.trim().toLowerCase();
-  let list=S.products.filter(p=>(!sel.value||p.category===sel.value)&&(!q||(p.title+' '+(p.desc||'')).toLowerCase().includes(q)));
-  const pn=x=>parseFloat(String(x||'').replace(/[^0-9.]/g,''))||0;const so=$('#sort').value;
-  if(so==='lo')list=[...list].sort((a,b)=>pn(a.price)-pn(b.price));if(so==='hi')list=[...list].sort((a,b)=>pn(b.price)-pn(a.price));
+  const list=S.products.filter(p=>(!sel.value||p.category===sel.value)&&(!q||(p.title+' '+(p.desc||'')).toLowerCase().includes(q)));
   const g=$('#grid');g.replaceChildren();
   const feed=S.ads.filter(a=>a.enabled!==false&&a.placement==='feed');
   const every=Math.max(2,+st.every||6);
@@ -294,10 +277,9 @@ function render(){
   let n=0;
   list.forEach((p,i)=>{
     const c=document.createElement('article');c.className='card';
-    const off=(()=>{const a=pn(p.was),b=pn(p.price);return a>b&&b>0?Math.round((1-b/a)*100):0})();
-    c.innerHTML=`<div class="img">${off?`<span class="badge">-${off}%</span>`:''}${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`:'🛍️'}</div>
+    c.innerHTML=`<div class="img">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`:'🛍️'}</div>
     <div class="b">${p.category?`<span class="cat">${esc(p.category)}</span>`:''}<h3>${esc(p.title)}</h3>${p.desc?`<p>${esc(p.desc)}</p>`:'<p></p>'}
-    ${p.price?`<div><span class="price">${esc(p.price)}</span>${p.was?`<s class="was">${esc(p.was)}</s>`:''}</div>`:''}
+    ${p.price?`<span class="price">${esc(p.price)}</span>`:''}
     <a class="btn" href="${esc(aff(p.url))}" target="_blank" rel="sponsored nofollow noopener">View on Amazon</a></div>`;
     g.appendChild(c);
     if(feed.length&&(i+1)%every===0){
@@ -337,9 +319,8 @@ async function openAdmin(){
 }
 
 function bind(){
-  $('#year').textContent='© '+new Date().getFullYear()+' · v5 store layout';
-  $('#q').oninput=render;$('#cat').onchange=render;$('#sort').onchange=render;
-  $('#chips').onclick=e=>{const c=e.target.dataset.c;if(c===undefined)return;$('#cat').value=c;render();};
+  $('#year').textContent='© '+new Date().getFullYear()+' · v4 classic layout';
+  $('#q').oninput=render;$('#cat').onchange=render;
   $('#openAdmin').onclick=()=>openAdmin().catch(e=>{$('#year').textContent='Error: '+e.message;});
   $('#pub').onclick=publish;
   $('#sf').theme.onchange=e=>{document.documentElement.dataset.theme=e.target.value;};
