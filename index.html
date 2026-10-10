@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Picks</title>
+<meta name="description" content="Hand-picked products with honest notes.">
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--ink:#14202b;--mute:#5d6b78;--line:#dde3e8;--acc:#0b6e6e;--acc-ink:#fff;--hi:#ffb703;--r:10px}
+@media(prefers-color-scheme:dark){:root{--bg:#0f161c;--card:#18222b;--ink:#e8eef3;--mute:#93a3b1;--line:#27343f;--acc:#3cc4b8;--acc-ink:#06201d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Iowan Old Style",Georgia,serif;line-height:1.2;margin:0}
+a{color:var(--acc)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header{padding:40px 0 20px}
+header h1{font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.02em}
+header p{color:var(--mute);margin:8px 0 0;max-width:56ch}
+.disc{font-size:.85rem;color:var(--mute);border-left:3px solid var(--hi);padding:4px 10px;margin:16px 0}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.bar input,.bar select{padding:9px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);color:var(--ink);font:inherit}
+.bar input{flex:1;min-width:180px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column}
+.card .img{aspect-ratio:4/3;background:var(--line);display:grid;place-items:center;font-size:2.4rem}
+.card img{width:100%;height:100%;object-fit:contain;background:#fff}
+.card .b{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font-size:1.05rem}
+.card .cat{font-size:.8rem;color:var(--mute)}
+.card p{margin:0;font-size:.92rem;color:var(--mute);flex:1}
+.price{font-weight:700}
+.btn{display:inline-block;border:0;border-radius:var(--r);padding:9px 14px;background:var(--acc);color:var(--acc-ink);font:inherit;font-weight:600;cursor:pointer;text-decoration:none;text-align:center}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:5px 10px;font-size:.85rem}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+.ad{grid-column:1/-1;display:flex;justify-content:center;min-height:0}
+.adwrap{display:flex;justify-content:center;margin:12px 0}
+.adwrap iframe,.ad iframe{border:0;max-width:100%}
+.empty{padding:40px;text-align:center;color:var(--mute);grid-column:1/-1}
+footer{padding:24px 0 48px;color:var(--mute);font-size:.85rem;border-top:1px solid var(--line)}
+footer button{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}
+/* admin */
+dialog{width:min(760px,96vw);max-height:92vh;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:0}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;z-index:99;font-size:.9rem;display:none;max-width:92vw;text-align:center}.dot{display:none;width:9px;height:9px;border-radius:50%;background:var(--hi);margin-left:6px}
+.dh{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
+.tabs{display:flex;gap:6px}
+.tabs button.on{background:var(--acc);color:var(--acc-ink)}
+.pane{padding:16px;display:none}.pane.on{display:block}
+form.f{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+form.f .w{grid-column:1/-1}
+label{display:flex;flex-direction:column;font-size:.85rem;gap:3px;color:var(--mute)}
+label input,label select,label textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.row small{color:var(--mute)}
+.note{font-size:.85rem;color:var(--mute);background:var(--bg);padding:10px;border-radius:8px;margin:0 0 12px}
+@media(max-width:560px){form.f{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">My Picks</h1>
+    <p id="tagline"></p>
+  </header>
+  <div class="disc">As an Amazon Associate I earn from qualifying purchases. This site also shows ads.</div>
+  <div id="ad-top" class="adwrap"></div>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search products" aria-label="Search products">
+    <select id="cat" aria-label="Filter by category"><option value="">All categories</option></select>
+  </div>
+  <main id="grid" class="grid" aria-live="polite"></main>
+  <div id="ad-bottom" class="adwrap"></div>
+  <footer>
+    <span id="year"></span> · <button id="openAdmin" type="button">Admin</button>
+  </footer>
+</div>
+
+<dialog id="adm">
+  <div class="dh">
+    <div class="tabs">
+      <button class="btn alt sm on" data-t="p">Products</button>
+      <button class="btn alt sm" data-t="a">Ads</button>
+      <button class="btn alt sm" data-t="s">Settings &amp; publish</button>
+    </div>
+    <span><button class="btn sm" id="pub" type="button">Publish to GitHub<span class="dot" id="dot" title="Unpublished changes"></span></button> <button class="btn alt sm" id="closeAdmin" type="button">Close</button></span>
+  </div>
+
+  <section class="pane on" id="pane-p">
+    <form class="f" id="pf">
+      <input type="hidden" name="id">
+      <label class="w">Title<input name="title" required></label>
+      <label class="w">Amazon link<input name="url" type="url" required placeholder="https://www.amazon.com/dp/ASIN or https://amzn.to/..."></label>
+      <label>Image URL<input name="image" type="url" placeholder="https://..."></label>
+      <label>Price (optional)<input name="price" placeholder="$29.99"></label>
+      <label>Category<input name="category" placeholder="Kitchen"></label>
+      <label class="w">Short note<input name="desc" maxlength="160"></label>
+      <div class="w"><button class="btn" type="submit">Save product</button> <button class="btn alt" type="reset" id="pr">Clear</button></div>
+    </form>
+    <div id="plist"></div>
+  </section>
+
+  <section class="pane" id="pane-a">
+    <p class="note">Paste the code from Adsterra (Banner, Native Banner, Social Bar or Popunder). Banners and native ads show in a placement; Social Bar and Popunder scripts use "Site-wide script".</p>
+    <form class="f" id="af">
+      <input type="hidden" name="id">
+      <label>Name<input name="name" required placeholder="Top banner 728x90"></label>
+      <label>Placement
+        <select name="placement">
+          <option value="top">Top of page</option>
+          <option value="feed">Between products</option>
+          <option value="bottom">Bottom of page</option>
+          <option value="global">Site-wide script</option>
+        </select>
+      </label>
+      <label class="w">Ad code<textarea name="code" required placeholder="<script>...</script>"></textarea></label>
+      <label>Width (px, optional)<input name="w" type="number" min="1"></label>
+      <label>Height (px, optional)<input name="h" type="number" min="1"></label>
+      <div class="w"><button class="btn" type="submit">Save ad</button> <button class="btn alt" type="reset">Clear</button></div>
+    </form>
+    <div id="alist"></div>
+  </section>
+
+  <section class="pane" id="pane-s">
+    <form class="f" id="sf">
+      <label>Site title<input name="title"></label>
+      <label>Tagline<input name="tagline"></label>
+      <label>Amazon Associates tag<input name="tag" placeholder="yourtag-20"></label>
+      <label>Show a feed ad every N products<input name="every" type="number" min="2" max="30"></label>
+      <label class="w">New admin passcode (leave empty to keep current)<input name="pass" type="password" autocomplete="new-password"></label>
+      <div class="w"><button class="btn" type="submit">Save settings</button></div>
+    </form>
+    <div id="toast" role="status"></div>
+    <h3 style="margin:8px 0">One-click publishing</h3>
+    <p class="note">Your edits are saved in this browser until you publish. Create a token at GitHub, Settings, Developer settings, Fine-grained tokens: limit it to this one repo with "Contents: Read and write". The token stays in this browser only and is never written into data.json.</p>
+    <form class="f" id="gf">
+      <label>Repo (username/repo)<input name="repo" placeholder="irfan/my-site"></label>
+      <label>Branch<input name="branch" placeholder="main"></label>
+      <label class="w">GitHub token<input name="token" type="password" autocomplete="off"></label>
+      <div class="w"><button class="btn" type="submit">Save GitHub details</button></div>
+    </form>
+    <p class="note">Or publish by hand: download data.json and upload it to the repo, replacing the old one.</p>
+    <button class="btn" id="exp" type="button">Download data.json</button>
+    <label class="btn alt" style="display:inline-block;cursor:pointer">Import data.json<input id="imp" type="file" accept=".json" hidden></label>
+    <button class="btn alt" id="reset" type="button">Discard local edits</button>
+  </section>
+</dialog>
+
+<dialog id="mb" style="width:min(360px,94vw)"><form method="dialog" style="padding:16px;display:grid;gap:12px"><label><span id="mt"></span><input id="mi" type="password" autocomplete="off"></label><div><button class="btn" value="ok">OK</button> <button class="btn alt" value="no">Cancel</button></div></form></dialog>
+
+<script>
+(()=>{
+const KEY='affsite:v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const sha=async t=>crypto.subtle?[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join(''):'x'+[...t].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+const DEFAULT={updatedAt:0,settings:{title:'My Picks',tagline:'Hand-picked products I would actually buy.',tag:'',every:6,passHash:''},products:[],ads:[]};
+let S=DEFAULT;
+
+async function load(){
+  let base=DEFAULT;
+  try{const r=await fetch('data.json',{cache:'no-cache'});if(r.ok)base=await r.json();}catch(e){}
+  let local=null;
+  try{local=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
+  S=(local&&(local.updatedAt||0)>(base.updatedAt||0))?local:base;
+  S.settings={...DEFAULT.settings,...S.settings};S.products||=[];S.ads||=[];
+}
+function save(){setTimeout(dirty);
+  S.updatedAt=Date.now();
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){say('Could not save in this browser. Download data.json instead.');}
+  render();renderAdmin();
+}
+
+/* in-page dialogs (browser prompt/alert are blocked in some embeds) */
+function ask(msg,inp){return new Promise(res=>{const d=$('#mb'),i=$('#mi');$('#mt').textContent=msg;i.hidden=!inp;i.value='';d.returnValue='';d.onclose=()=>res(d.returnValue==='ok'?(inp?i.value:true):(inp?null:false));d.showModal();if(inp)i.focus();});}
+const say=m=>ask(m);
+/* GitHub publish */
+const GK='affsite:gh';
+const gh=()=>{try{return JSON.parse(localStorage.getItem(GK)||'{}')}catch(e){return{}}};
+const ghSet=o=>{try{localStorage.setItem(GK,JSON.stringify({...gh(),...o}))}catch(e){}};
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>t.style.display='none',4000);}
+function dirty(){const p=gh().pubAt;$('#dot').style.display=(p!==undefined?(S.updatedAt||0)>p:!!localStorage.getItem(KEY))?'inline-block':'none';}
+function b64(s){let b='';new TextEncoder().encode(s).forEach(x=>b+=String.fromCharCode(x));return btoa(b);}
+async function publish(){
+  const g=gh();
+  if(!g.repo||!g.token){toast('Add your GitHub repo and token in Settings first.');return;}
+  const api='https://api.github.com/repos/'+g.repo+'/contents/data.json',br=g.branch||'main';
+  const H={Authorization:'Bearer '+g.token,Accept:'application/vnd.github+json'};
+  toast('Publishing...');
+  try{
+    let sha;
+    const r=await fetch(api+'?ref='+encodeURIComponent(br),{headers:H,cache:'no-store'});
+    if(r.ok)sha=(await r.json()).sha;else if(r.status!==404)throw new Error(r.status===401?'token rejected':'GitHub error '+r.status);
+    const body={message:'Update data.json from CMS',content:b64(JSON.stringify(S,null,2)),branch:br};
+    if(sha)body.sha=sha;
+    const w=await fetch(api,{method:'PUT',headers:H,body:JSON.stringify(body)});
+    if(!w.ok)throw new Error(w.status===404?'repo not found or token has no access':'GitHub error '+w.status);
+    ghSet({pubAt:S.updatedAt});dirty();toast('Published! It goes live in about a minute.');
+  }catch(e){toast('Failed: '+e.message);}
+}
+/* affiliate link */
+function aff(u){
+  try{const x=new URL(u);
+    if(S.settings.tag&&/(^|\.)amazon\.[a-z.]+$/.test(x.hostname))x.searchParams.set('tag',S.settings.tag);
+    return x.href;}catch(e){return u;}
+}
+
+/* ads */
+function adSize(ad){
+  const c=ad.code||'';
+  const w=+ad.w||+(c.match(/['"]?width['"]?\s*[:=]\s*['"]?(\d+)/)||[])[1]||(/native|container-/i.test(c)?0:300);
+  const h=+ad.h||+(c.match(/['"]?height['"]?\s*[:=]\s*['"]?(\d+)/)||[])[1]||(/native|container-/i.test(c)?280:250);
+  return {w,h};
+}
+function adFrame(ad){
+  const {w,h}=adSize(ad);
+  const f=document.createElement('iframe');
+  f.title='Advertisement';f.loading='lazy';
+  f.setAttribute('sandbox','allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+  f.style.width=w?w+'px':'100%';f.style.height=h+'px';
+  f.srcdoc='<!doctype html><body style="margin:0;display:flex;justify-content:center">'+ad.code;
+  return f;
+}
+function fill(el,placement){
+  el.replaceChildren();
+  S.ads.filter(a=>a.enabled!==false&&a.placement===placement).forEach(a=>el.appendChild(adFrame(a)));
+}
+let globalsDone=false;
+function injectGlobals(){
+  if(globalsDone)return;globalsDone=true;
+  S.ads.filter(a=>a.enabled!==false&&a.placement==='global').forEach(a=>{
+    const t=document.createElement('template');t.innerHTML=a.code;
+    t.content.querySelectorAll('script').forEach(o=>{
+      const s=document.createElement('script');
+      [...o.attributes].forEach(at=>s.setAttribute(at.name,at.value));
+      s.text=o.text;document.body.appendChild(s);
+    });
+  });
+}
+
+/* render */
+function render(){
+  const st=S.settings;
+  document.title=st.title;$('#title').textContent=st.title;$('#tagline').textContent=st.tagline;
+  const cats=[...new Set(S.products.map(p=>p.category).filter(Boolean))].sort();
+  const sel=$('#cat'),cur=sel.value;
+  sel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  sel.value=cats.includes(cur)?cur:'';
+  const q=$('#q').value.trim().toLowerCase();
+  const list=S.products.filter(p=>(!sel.value||p.category===sel.value)&&(!q||(p.title+' '+(p.desc||'')).toLowerCase().includes(q)));
+  const g=$('#grid');g.replaceChildren();
+  const feed=S.ads.filter(a=>a.enabled!==false&&a.placement==='feed');
+  const every=Math.max(2,+st.every||6);
+  if(!list.length){g.innerHTML='<div class="empty">No products yet. Open Admin at the bottom of the page to add your first one.</div>';}
+  let n=0;
+  list.forEach((p,i)=>{
+    const c=document.createElement('article');c.className='card';
+    c.innerHTML=`<div class="img">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`:'🛍️'}</div>
+    <div class="b">${p.category?`<span class="cat">${esc(p.category)}</span>`:''}<h3>${esc(p.title)}</h3>${p.desc?`<p>${esc(p.desc)}</p>`:'<p></p>'}
+    ${p.price?`<span class="price">${esc(p.price)}</span>`:''}
+    <a class="btn" href="${esc(aff(p.url))}" target="_blank" rel="sponsored nofollow noopener">View on Amazon</a></div>`;
+    g.appendChild(c);
+    if(feed.length&&(i+1)%every===0){
+      const d=document.createElement('div');d.className='ad';d.appendChild(adFrame(feed[n++%feed.length]));g.appendChild(d);
+    }
+  });
+  fill($('#ad-top'),'top');fill($('#ad-bottom'),'bottom');
+}
+
+/* admin */
+function renderAdmin(){
+  $('#plist').innerHTML=S.products.map(p=>`<div class="row"><div><b>${esc(p.title)}</b><br><small>${esc(p.category||'')} ${esc(p.price||'')}</small></div>
+    <div><button class="btn alt sm" data-ep="${p.id}">Edit</button> <button class="btn alt sm" data-dp="${p.id}">Delete</button></div></div>`).join('')||'<small>No products yet.</small>';
+  $('#alist').innerHTML=S.ads.map(a=>`<div class="row"><div><b>${esc(a.name)}</b><br><small>${esc(a.placement)} · ${a.enabled!==false?'on':'off'}</small></div>
+    <div><button class="btn alt sm" data-ta="${a.id}">${a.enabled!==false?'Turn off':'Turn on'}</button> <button class="btn alt sm" data-ea="${a.id}">Edit</button> <button class="btn alt sm" data-da="${a.id}">Delete</button></div></div>`).join('')||'<small>No ads yet.</small>';
+  const f=$('#sf');['title','tagline','tag','every'].forEach(k=>f[k].value=S.settings[k]??'');
+  const g=gh(),gf=$('#gf');gf.repo.value=g.repo||'';gf.branch.value=g.branch||'main';gf.token.value=g.token||'';dirty();
+}
+const fd=f=>Object.fromEntries(new FormData(f));
+function fillForm(f,o){[...f.elements].forEach(e=>{if(e.name)e.value=o[e.name]??''});f.scrollIntoView({behavior:'smooth',block:'nearest'});}
+
+async function openAdmin(){
+  if(!sessionStorage.getItem('adm')){
+    if(!S.settings.passHash){
+      const p=await ask('Create an admin passcode (min 6 characters):',true);
+      if(!p||p.length<6){if(p)say('Passcode needs at least 6 characters.');return;}
+      S.settings.passHash=await sha(p);save();
+    }else{
+      const p=await ask('Admin passcode:',true);if(!p)return;
+      if(await sha(p)!==S.settings.passHash){say('Wrong passcode.');return;}
+    }
+    sessionStorage.setItem('adm','1');
+  }
+  renderAdmin();$('#adm').showModal();
+}
+
+function bind(){
+  $('#year').textContent='© '+new Date().getFullYear();
+  $('#q').oninput=render;$('#cat').onchange=render;
+  $('#openAdmin').onclick=openAdmin;
+  $('#pub').onclick=publish;
+  $('#gf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);ghSet({repo:d.repo.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,''),branch:(d.branch||'main').trim(),token:d.token.trim()});toast('GitHub details saved.');};
+  $('#af').code.addEventListener('input',e=>{const c=e.target.value,p=$('#af').placement;if(/atOptions/.test(c)){if(p.value==='global')p.value='top';}else if(/container-/.test(c)){if(p.value==='global')p.value='feed';}else if(/<script/i.test(c))p.value='global';});
+  $('#closeAdmin').onclick=()=>$('#adm').close();
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+    document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+b.dataset.t));
+  });
+  $('#pf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);
+    if(d.id){Object.assign(S.products.find(p=>p.id===d.id),d);}else{d.id=uid();S.products.unshift(d);}
+    e.target.reset();e.target.id.value='';save();toast('Saved. Click "Publish to GitHub" to make it live.');};
+  $('#af').onsubmit=e=>{e.preventDefault();const d=fd(e.target);
+    if(d.id){Object.assign(S.ads.find(a=>a.id===d.id),d);}else{d.id=uid();d.enabled=true;S.ads.push(d);}
+    e.target.reset();e.target.id.value='';globalsDone=false;save();toast('Saved. Click "Publish to GitHub" to make it live.');
+    if(d.placement==='global')say('Site-wide scripts load on the next page refresh.');};
+  $('#sf').onsubmit=async e=>{e.preventDefault();const d=fd(e.target);
+    Object.assign(S.settings,{title:d.title,tagline:d.tagline,tag:d.tag.trim(),every:+d.every||6});
+    if(d.pass){if(d.pass.length<6)return say('Passcode needs at least 6 characters.');S.settings.passHash=await sha(d.pass);}
+    e.target.pass.value='';save();};
+  $('#adm').addEventListener('click',async e=>{
+    const t=e.target.dataset||{};
+    if(t.ep)fillForm($('#pf'),S.products.find(p=>p.id===t.ep));
+    if(t.ea)fillForm($('#af'),S.ads.find(a=>a.id===t.ea));
+    if(t.dp&&await ask('Delete this product?')){S.products=S.products.filter(p=>p.id!==t.dp);save();}
+    if(t.da&&await ask('Delete this ad?')){S.ads=S.ads.filter(a=>a.id!==t.da);save();}
+    if(t.ta){const a=S.ads.find(a=>a.id===t.ta);a.enabled=a.enabled===false;save();}
+  });
+  $('#exp').onclick=()=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+    a.download='data.json';a.click();URL.revokeObjectURL(a.href);};
+  $('#imp').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());
+    if(!Array.isArray(j.products))throw 0;S={...DEFAULT,...j};save();}catch(x){say('That file is not a valid data.json.');}};
+  $('#reset').onclick=async()=>{if(await ask('Discard edits saved in this browser and reload from data.json?')){localStorage.removeItem(KEY);location.reload();}};
+  if(location.hash==='#admin')openAdmin();
+}
+load().then(()=>{bind();render();injectGlobals();});
+})();
+</script>
+</body>
+</html>

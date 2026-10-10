@@ -1,0 +1,12 @@
+{
+  "updatedAt": 1,
+  "settings": {
+    "title": "My Picks",
+    "tagline": "Hand-picked products I would actually buy.",
+    "tag": "",
+    "every": 6,
+    "passHash": ""
+  },
+  "products": [],
+  "ads": []
+}
