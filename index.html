@@ -105,7 +105,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
     <form class="f" id="pf">
       <input type="hidden" name="id">
       <label class="w">Title<input name="title" required></label>
-      <label class="w">Amazon link<input name="url" type="url" required placeholder="https://www.amazon.com/dp/ASIN or https://amzn.to/..."></label>
+      <label class="w">Amazon link<input name="url" type="text" required placeholder="https://www.amazon.com/dp/ASIN or https://amzn.to/..."></label>
       <label>Image link<input name="image" placeholder="https://m.media-amazon.com/...jpg"></label>
       <label>Or upload a picture<input type="file" id="imgf" accept="image/*"><input type="hidden" name="imgdata"></label>
       <label>Price (optional)<input name="price" placeholder="$29.99"></label>
@@ -326,6 +326,7 @@ function bind(){
   $('#q').oninput=render;$('#cat').onchange=render;
   $('#openAdmin').onclick=()=>openAdmin().catch(e=>{$('#year').textContent='Error: '+e.message;});
   $('#pub').onclick=publish;
+  document.querySelectorAll('form.f').forEach(f=>f.addEventListener('reset',()=>setTimeout(()=>[...f.elements].forEach(x=>{if(x.type==='hidden')x.value='';}))));
   $('#sf').theme.onchange=e=>{document.documentElement.dataset.theme=e.target.value;};
   document.querySelectorAll('form.f').forEach(f=>{const b=f.querySelector('button[type=submit]');b&&b.addEventListener('click',e=>{e.preventDefault();if(f.reportValidity())f.onsubmit({preventDefault(){},target:f});});});
   $('#imgf').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const k=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);$('#pf').imgdata.value=c.toDataURL('image/jpeg',.8);URL.revokeObjectURL(u);toast('Picture ready. Now click Save product.');};im.onerror=()=>toast('Could not read that picture.');im.src=u;};
@@ -336,7 +337,7 @@ function bind(){
     document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+b.dataset.t));
   });
-  $('#pf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);if(d.imgdata)d.image=d.imgdata;delete d.imgdata;
+  $('#pf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);if(d.imgdata)d.image=d.imgdata;delete d.imgdata;e.target.imgdata.value='';d.url=d.url.trim();if(!/^https?:\/\//i.test(d.url))d.url='https://'+d.url;
     if(d.id){Object.assign(S.products.find(p=>p.id===d.id),d);}else{d.id=uid();S.products.unshift(d);}
     e.target.reset();e.target.id.value='';save();toast('Saved. Click "Publish to GitHub" to make it live.');};
   $('#af').onsubmit=e=>{e.preventDefault();const d=fd(e.target);
