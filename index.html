@@ -179,10 +179,11 @@ let S=DEFAULT;
 
 async function load(){
   let base=DEFAULT;
-  try{const r=await fetch('data.json',{cache:'no-cache'});if(r.ok)base=await r.json();}catch(e){}
+  try{const r=await fetch('data.json?v='+Date.now(),{cache:'no-store'});if(r.ok)base=await r.json();}catch(e){}
   let local=null;
   try{local=JSON.parse(localStorage.getItem(KEY)||'null');}catch(e){}
-  S=(local&&(local.updatedAt||0)>(base.updatedAt||0))?local:base;
+  let adm=null;try{adm=sessionStorage.getItem('adm')}catch(e){}
+  S=(adm&&local&&(local.updatedAt||0)>(base.updatedAt||0))?local:base;
   S.settings={...DEFAULT.settings,...S.settings};S.products||=[];S.ads||=[];
 }
 function save(){setTimeout(dirty);
@@ -191,6 +192,8 @@ function save(){setTimeout(dirty);
   render();renderAdmin();
 }
 
+/* visitors always see the published data.json; an admin's unpublished draft loads only after admin login */
+function useDraft(){try{const l=JSON.parse(localStorage.getItem(KEY)||'null');if(l&&(l.updatedAt||0)>(S.updatedAt||0)){S=l;S.settings={...DEFAULT.settings,...S.settings};S.products||=[];S.ads||=[];render();}}catch(e){}}
 /* in-page dialogs (browser prompt/alert are blocked in some embeds) */
 function ask(msg,inp){return new Promise(res=>{const d=$('#mb'),i=$('#mi');if(d.open)d.close();$('#mt').textContent=msg;i.hidden=!inp;i.value='';d.returnValue='';$('#mok').onclick=()=>d.close('ok');$('#mno').onclick=()=>d.close('no');i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();d.close('ok');}};d.onclose=()=>res(d.returnValue==='ok'?(inp?i.value:true):(inp?null:false));d.showModal();if(inp)i.focus();});}
 const say=m=>ask(m);
@@ -302,7 +305,7 @@ const fd=f=>Object.fromEntries(new FormData(f));
 function fillForm(f,o){[...f.elements].forEach(e=>{if(e.name)e.value=o[e.name]??''});f.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
 async function openAdmin(){
-  let ok=null;try{ok=sessionStorage.getItem('adm')}catch(e){}
+  useDraft();let ok=null;try{ok=sessionStorage.getItem('adm')}catch(e){}
   if(!ok){
     if(!S.settings.passHash){
       const p=await ask('Create an admin passcode (min 6 characters):',true);
