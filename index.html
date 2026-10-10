@@ -337,7 +337,7 @@ async function openAdmin(){
 }
 
 function bind(){
-  $('#year').textContent='© '+new Date().getFullYear();
+  $('#year').textContent='© '+new Date().getFullYear()+' · v5 store layout';
   $('#q').oninput=render;$('#cat').onchange=render;$('#sort').onchange=render;
   $('#chips').onclick=e=>{const c=e.target.dataset.c;if(c===undefined)return;$('#cat').value=c;render();};
   $('#openAdmin').onclick=()=>openAdmin().catch(e=>{$('#year').textContent='Error: '+e.message;});
