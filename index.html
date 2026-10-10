@@ -43,6 +43,28 @@ footer button{background:none;border:0;color:inherit;text-decoration:underline;c
 dialog{width:min(760px,96vw);max-height:92vh;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:0}
 dialog::backdrop{background:rgba(0,0,0,.5)}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;z-index:99;font-size:.9rem;display:none;max-width:92vw;text-align:center}.dot{display:none;width:9px;height:9px;border-radius:50%;background:var(--hi);margin-left:6px}
+html[data-theme=ocean]{--bg:#eef6fb;--card:#fff;--ink:#0b2a3f;--mute:#4f6b7d;--line:#d3e4ee;--acc:#0a7ea4;--acc-ink:#fff;--hi:#ffb703}
+html[data-theme=sunset]{--bg:#fff6f0;--card:#fff;--ink:#2d1a14;--mute:#7a5c50;--line:#f0dcd2;--acc:#e4572e;--acc-ink:#fff;--hi:#ffc857}
+html[data-theme=forest]{--bg:#f1f5ef;--card:#fff;--ink:#1b2a1e;--mute:#5b6e5f;--line:#d9e3d6;--acc:#2f7d4f;--acc-ink:#fff;--hi:#e9c46a}
+html[data-theme=rose]{--bg:#fff5f7;--card:#fff;--ink:#2b1620;--mute:#7d5b68;--line:#f1d9e0;--acc:#d6336c;--acc-ink:#fff;--hi:#ffd43b}
+html[data-theme=midnight]{--bg:#0e1116;--card:#161b22;--ink:#e6edf3;--mute:#8b98a5;--line:#262e38;--acc:#7c9cff;--acc-ink:#0b1020;--hi:#ffd166}
+header{background:linear-gradient(135deg,var(--acc),color-mix(in srgb,var(--acc) 62%,var(--ink)));color:var(--acc-ink);border-radius:18px;padding:34px 26px;margin:20px 0 4px}
+header p{color:inherit;opacity:.9}
+.card{transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.14)}
+.price{font-size:1.15rem;font-weight:700;color:var(--ink)}
+.was{color:var(--mute);font-weight:400;font-size:.9rem;margin-left:4px}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 18px;margin:0 0 12px;border-radius:0 0 16px 16px;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+header h1{font-size:1.5rem}
+header p{margin:0;font-size:.9rem}
+.card .img{aspect-ratio:1/1;position:relative}
+.card h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-family:inherit;font-size:.98rem;font-weight:600}
+.card .btn{background:var(--hi);color:#111;border-radius:99px}
+.badge{position:absolute;top:10px;left:10px;background:#d64545;color:#fff;font-weight:700;font-size:.8rem;padding:3px 8px;border-radius:6px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.del{color:#d64545!important;border-color:#d64545!important}
 .dh{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
 .tabs{display:flex;gap:6px}
 .tabs button.on{background:var(--acc);color:var(--acc-ink)}
@@ -68,8 +90,10 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
   <div id="ad-top" class="adwrap"></div>
   <div class="bar">
     <input id="q" type="search" placeholder="Search products" aria-label="Search products">
-    <select id="cat" aria-label="Filter by category"><option value="">All categories</option></select>
+    <select id="cat" aria-label="Filter by category" hidden><option value="">All categories</option></select>
+    <select id="sort" aria-label="Sort"><option value="">Newest</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>
   </div>
+  <div id="chips" class="chips"></div>
   <main id="grid" class="grid" aria-live="polite"></main>
   <div id="ad-bottom" class="adwrap"></div>
   <footer>
@@ -89,6 +113,8 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
 
   <div id="toast" role="status"></div>
   <section class="pane on" id="pane-p">
+    <h3 style="margin:0 0 6px">Your products</h3><div id="plist"></div>
+    <h3 style="margin:18px 0 8px">Add or edit a product</h3>
     <form class="f" id="pf">
       <input type="hidden" name="id">
       <label class="w">Title<input name="title" required></label>
@@ -96,15 +122,18 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
       <label>Image link<input name="image" placeholder="https://m.media-amazon.com/...jpg"></label>
       <label>Or upload a picture<input type="file" id="imgf" accept="image/*"><input type="hidden" name="imgdata"></label>
       <label>Price (optional)<input name="price" placeholder="$29.99"></label>
+      <label>Old price (optional, shows a discount badge)<input name="was" placeholder="$39.99"></label>
       <label>Category<input name="category" placeholder="Kitchen"></label>
       <label class="w">Short note<input name="desc" maxlength="160"></label>
       <div class="w"><button class="btn" type="submit">Save product</button> <button class="btn alt" type="reset" id="pr">Clear</button></div>
     </form>
-    <div id="plist"></div>
+    
   </section>
 
   <section class="pane" id="pane-a">
     <p class="note">Paste the code from Adsterra (Banner, Native Banner, Social Bar or Popunder). For a Smartlink, paste just the link (https://...): it shows as a "Sponsored" button, and the Name field becomes the button text. Banners and native ads show in a placement; Social Bar and Popunder scripts use "Site-wide script".</p>
+    <h3 style="margin:0 0 6px">Your ads</h3><div id="alist"></div>
+    <h3 style="margin:18px 0 8px">Add or edit an ad</h3>
     <form class="f" id="af">
       <input type="hidden" name="id">
       <label>Name<input name="name" required placeholder="Top banner 728x90"></label>
@@ -121,13 +150,14 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
       <label>Height (px, optional)<input name="h" type="number" min="1"></label>
       <div class="w"><button class="btn" type="submit">Save ad</button> <button class="btn alt" type="reset">Clear</button></div>
     </form>
-    <div id="alist"></div>
+    
   </section>
 
   <section class="pane" id="pane-s">
     <form class="f" id="sf">
       <label>Site title<input name="title"></label>
       <label>Tagline<input name="tagline"></label>
+      <label>Theme<select name="theme"><option value="classic">Classic (auto light/dark)</option><option value="ocean">Ocean blue</option><option value="sunset">Sunset orange</option><option value="forest">Forest green</option><option value="rose">Rose pink</option><option value="midnight">Midnight dark</option></select></label>
       <label>Amazon Associates tag<input name="tag" placeholder="yourtag-20"></label>
       <label>Show a feed ad every N products<input name="every" type="number" min="2" max="30"></label>
       <label class="w">New admin passcode (leave empty to keep current)<input name="pass" type="password" autocomplete="new-password"></label>
@@ -171,7 +201,7 @@ async function load(){
 }
 function save(){setTimeout(dirty);
   S.updatedAt=Date.now();
-  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){say('Could not save in this browser. Download data.json instead.');}
+  try{localStorage.setItem(KEY,JSON.stringify(S));if(localStorage.getItem(KEY)===null)throw 0;}catch(e){say('This browser is not keeping your changes (private mode or blocked storage). Use Publish to GitHub or Download data.json before you leave.');}
   render();renderAdmin();
 }
 
@@ -247,13 +277,16 @@ function injectGlobals(){
 /* render */
 function render(){
   const st=S.settings;
-  document.title=st.title;$('#title').textContent=st.title;$('#tagline').textContent=st.tagline;
+  document.title=st.title;document.documentElement.dataset.theme=st.theme||'classic';$('#title').textContent=st.title;$('#tagline').textContent=st.tagline;
   const cats=[...new Set(S.products.map(p=>p.category).filter(Boolean))].sort();
   const sel=$('#cat'),cur=sel.value;
   sel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${esc(c)}</option>`).join('');
   sel.value=cats.includes(cur)?cur:'';
+  $('#chips').innerHTML=['',...cats].map(c=>`<button type="button" class="chip${sel.value===c?' on':''}" data-c="${esc(c)}">${c?esc(c):'All'}</button>`).join('');
   const q=$('#q').value.trim().toLowerCase();
-  const list=S.products.filter(p=>(!sel.value||p.category===sel.value)&&(!q||(p.title+' '+(p.desc||'')).toLowerCase().includes(q)));
+  let list=S.products.filter(p=>(!sel.value||p.category===sel.value)&&(!q||(p.title+' '+(p.desc||'')).toLowerCase().includes(q)));
+  const pn=x=>parseFloat(String(x||'').replace(/[^0-9.]/g,''))||0;const so=$('#sort').value;
+  if(so==='lo')list=[...list].sort((a,b)=>pn(a.price)-pn(b.price));if(so==='hi')list=[...list].sort((a,b)=>pn(b.price)-pn(a.price));
   const g=$('#grid');g.replaceChildren();
   const feed=S.ads.filter(a=>a.enabled!==false&&a.placement==='feed');
   const every=Math.max(2,+st.every||6);
@@ -261,9 +294,10 @@ function render(){
   let n=0;
   list.forEach((p,i)=>{
     const c=document.createElement('article');c.className='card';
-    c.innerHTML=`<div class="img">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`:'🛍️'}</div>
+    const off=(()=>{const a=pn(p.was),b=pn(p.price);return a>b&&b>0?Math.round((1-b/a)*100):0})();
+    c.innerHTML=`<div class="img">${off?`<span class="badge">-${off}%</span>`:''}${p.image?`<img src="${esc(p.image)}" alt="${esc(p.title)}" loading="lazy" referrerpolicy="no-referrer">`:'🛍️'}</div>
     <div class="b">${p.category?`<span class="cat">${esc(p.category)}</span>`:''}<h3>${esc(p.title)}</h3>${p.desc?`<p>${esc(p.desc)}</p>`:'<p></p>'}
-    ${p.price?`<span class="price">${esc(p.price)}</span>`:''}
+    ${p.price?`<div><span class="price">${esc(p.price)}</span>${p.was?`<s class="was">${esc(p.was)}</s>`:''}</div>`:''}
     <a class="btn" href="${esc(aff(p.url))}" target="_blank" rel="sponsored nofollow noopener">View on Amazon</a></div>`;
     g.appendChild(c);
     if(feed.length&&(i+1)%every===0){
@@ -276,10 +310,10 @@ function render(){
 /* admin */
 function renderAdmin(){
   $('#plist').innerHTML=S.products.map(p=>`<div class="row"><div><b>${esc(p.title)}</b><br><small>${esc(p.category||'')} ${esc(p.price||'')}</small></div>
-    <div><button class="btn alt sm" data-ep="${p.id}">Edit</button> <button class="btn alt sm" data-dp="${p.id}">Delete</button></div></div>`).join('')||'<small>No products yet.</small>';
+    <div><button class="btn alt sm" data-ep="${p.id}">Edit</button> <button class="btn alt sm del" data-dp="${p.id}">🗑 Delete</button></div></div>`).join('')||'<small>No products yet.</small>';
   $('#alist').innerHTML=S.ads.map(a=>`<div class="row"><div><b>${esc(a.name)}</b><br><small>${esc(a.placement)} · ${a.enabled!==false?'on':'off'}</small></div>
-    <div><button class="btn alt sm" data-ta="${a.id}">${a.enabled!==false?'Turn off':'Turn on'}</button> <button class="btn alt sm" data-ea="${a.id}">Edit</button> <button class="btn alt sm" data-da="${a.id}">Delete</button></div></div>`).join('')||'<small>No ads yet.</small>';
-  const f=$('#sf');['title','tagline','tag','every'].forEach(k=>f[k].value=S.settings[k]??'');
+    <div><button class="btn alt sm" data-ta="${a.id}">${a.enabled!==false?'Turn off':'Turn on'}</button> <button class="btn alt sm" data-ea="${a.id}">Edit</button> <button class="btn alt sm del" data-da="${a.id}">🗑 Delete</button></div></div>`).join('')||'<small>No ads yet.</small>';
+  const f=$('#sf');['title','tagline','tag','every'].forEach(k=>f[k].value=S.settings[k]??'');f.theme.value=S.settings.theme||'classic';
   const g=gh(),gf=$('#gf');gf.repo.value=g.repo||'';gf.branch.value=g.branch||'main';gf.token.value=g.token||'';dirty();
 }
 const fd=f=>Object.fromEntries(new FormData(f));
@@ -304,9 +338,11 @@ async function openAdmin(){
 
 function bind(){
   $('#year').textContent='© '+new Date().getFullYear();
-  $('#q').oninput=render;$('#cat').onchange=render;
+  $('#q').oninput=render;$('#cat').onchange=render;$('#sort').onchange=render;
+  $('#chips').onclick=e=>{const c=e.target.dataset.c;if(c===undefined)return;$('#cat').value=c;render();};
   $('#openAdmin').onclick=()=>openAdmin().catch(e=>{$('#year').textContent='Error: '+e.message;});
   $('#pub').onclick=publish;
+  $('#sf').theme.onchange=e=>{document.documentElement.dataset.theme=e.target.value;};
   document.querySelectorAll('form.f').forEach(f=>{const b=f.querySelector('button[type=submit]');b&&b.addEventListener('click',e=>{e.preventDefault();if(f.reportValidity())f.onsubmit({preventDefault(){},target:f});});});
   $('#imgf').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const k=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);$('#pf').imgdata.value=c.toDataURL('image/jpeg',.8);URL.revokeObjectURL(u);toast('Picture ready. Now click Save product.');};im.onerror=()=>toast('Could not read that picture.');im.src=u;};
   $('#gf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);ghSet({repo:d.repo.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,''),branch:(d.branch||'main').trim(),token:d.token.trim()});toast('GitHub details saved.');};
@@ -324,7 +360,7 @@ function bind(){
     e.target.reset();e.target.id.value='';globalsDone=false;save();toast('Saved. Click "Publish to GitHub" to make it live.');
     if(d.placement==='global')say('Site-wide scripts load on the next page refresh.');};
   $('#sf').onsubmit=async e=>{e.preventDefault();const d=fd(e.target);
-    Object.assign(S.settings,{title:d.title,tagline:d.tagline,tag:d.tag.trim(),every:+d.every||6});
+    Object.assign(S.settings,{title:d.title,tagline:d.tagline,tag:d.tag.trim(),every:+d.every||6,theme:d.theme||'classic'});
     if(d.pass){if(d.pass.length<6)return say('Passcode needs at least 6 characters.');S.settings.passHash=await sha(d.pass);}
     e.target.pass.value='';save();};
   $('#adm').addEventListener('click',async e=>{
