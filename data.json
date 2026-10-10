@@ -1,22 +1,12 @@
 {
-  "updatedAt": 1791620509016,
+  "updatedAt": 1,
   "settings": {
-    "title": "My Picks",
+    "title": "The Daily Find",
     "tagline": "Hand-picked products I would actually buy.",
     "tag": "",
     "every": 6,
-    "passHash": "ceb7718c84b68de3e4e87bc1ee3747fd5f8d14aeb2134c13ae472cd1353af7fb"
+    "passHash": ""
   },
   "products": [],
-  "ads": [
-    {
-      "id": "4o3jicr",
-      "name": "ad2",
-      "placement": "top",
-      "code": "<script>\n  atOptions = {\n    'key' : '41e73a83905a7b9862852adc140174a4',\n    'format' : 'iframe',\n    'height' : 90,\n    'width' : 728,\n    'params' : {}\n  };\n</script>\n<script src=\"https://www.highrevenueformat.com/41e73a83905a7b9862852adc140174a4/invoke.js\"></script>",
-      "w": "",
-      "h": "",
-      "enabled": true
-    }
-  ]
+  "ads": []
 }
