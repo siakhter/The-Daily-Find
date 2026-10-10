@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Picks</title>
+<title>The Daily Find</title>
 <meta name="description" content="Hand-picked products with honest notes.">
 <style>
 :root{--bg:#f3f5f7;--card:#fff;--ink:#14202b;--mute:#5d6b78;--line:#dde3e8;--acc:#0b6e6e;--acc-ink:#fff;--hi:#ffb703;--r:10px}
@@ -61,7 +61,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
 <body>
 <div class="wrap">
   <header>
-    <h1 id="title">My Picks</h1>
+    <h1 id="title">The Daily Find</h1>
     <p id="tagline"></p>
   </header>
   <div class="disc">As an Amazon Associate I earn from qualifying purchases. This site also shows ads.</div>
@@ -87,12 +87,14 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
     <span><button class="btn sm" id="pub" type="button">Publish to GitHub<span class="dot" id="dot" title="Unpublished changes"></span></button> <button class="btn alt sm" id="closeAdmin" type="button">Close</button></span>
   </div>
 
+  <div id="toast" role="status"></div>
   <section class="pane on" id="pane-p">
     <form class="f" id="pf">
       <input type="hidden" name="id">
       <label class="w">Title<input name="title" required></label>
       <label class="w">Amazon link<input name="url" type="url" required placeholder="https://www.amazon.com/dp/ASIN or https://amzn.to/..."></label>
-      <label>Image URL<input name="image" type="url" placeholder="https://..."></label>
+      <label>Image link<input name="image" placeholder="https://m.media-amazon.com/...jpg"></label>
+      <label>Or upload a picture<input type="file" id="imgf" accept="image/*"><input type="hidden" name="imgdata"></label>
       <label>Price (optional)<input name="price" placeholder="$29.99"></label>
       <label>Category<input name="category" placeholder="Kitchen"></label>
       <label class="w">Short note<input name="desc" maxlength="160"></label>
@@ -131,7 +133,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
       <label class="w">New admin passcode (leave empty to keep current)<input name="pass" type="password" autocomplete="new-password"></label>
       <div class="w"><button class="btn" type="submit">Save settings</button></div>
     </form>
-    <div id="toast" role="status"></div>
+    
     <h3 style="margin:8px 0">One-click publishing</h3>
     <p class="note">Your edits are saved in this browser until you publish. Create a token at GitHub, Settings, Developer settings, Fine-grained tokens: limit it to this one repo with "Contents: Read and write". The token stays in this browser only and is never written into data.json.</p>
     <form class="f" id="gf">
@@ -147,7 +149,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
   </section>
 </dialog>
 
-<dialog id="mb" style="width:min(360px,94vw)"><form method="dialog" style="padding:16px;display:grid;gap:12px"><label><span id="mt"></span><input id="mi" type="password" autocomplete="off"></label><div><button class="btn" value="ok">OK</button> <button class="btn alt" value="no">Cancel</button></div></form></dialog>
+<dialog id="mb" style="width:min(360px,94vw)"><div style="padding:16px;display:grid;gap:12px"><label><span id="mt"></span><input id="mi" type="password" autocomplete="off"></label><div><button class="btn" type="button" id="mok">OK</button> <button class="btn alt" type="button" id="mno">Cancel</button></div></div></dialog>
 
 <script>
 (()=>{
@@ -156,7 +158,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const uid=()=>Math.random().toString(36).slice(2,9);
 const sha=async t=>crypto.subtle?[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))].map(b=>b.toString(16).padStart(2,'0')).join(''):'x'+[...t].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
-const DEFAULT={updatedAt:0,settings:{title:'My Picks',tagline:'Hand-picked products I would actually buy.',tag:'',every:6,passHash:''},products:[],ads:[]};
+const DEFAULT={updatedAt:0,settings:{title:'The Daily Find',tagline:'Hand-picked products I would actually buy.',tag:'',every:6,passHash:''},products:[],ads:[]};
 let S=DEFAULT;
 
 async function load(){
@@ -174,7 +176,7 @@ function save(){setTimeout(dirty);
 }
 
 /* in-page dialogs (browser prompt/alert are blocked in some embeds) */
-function ask(msg,inp){return new Promise(res=>{const d=$('#mb'),i=$('#mi');$('#mt').textContent=msg;i.hidden=!inp;i.value='';d.returnValue='';d.onclose=()=>res(d.returnValue==='ok'?(inp?i.value:true):(inp?null:false));d.showModal();if(inp)i.focus();});}
+function ask(msg,inp){return new Promise(res=>{const d=$('#mb'),i=$('#mi');if(d.open)d.close();$('#mt').textContent=msg;i.hidden=!inp;i.value='';d.returnValue='';$('#mok').onclick=()=>d.close('ok');$('#mno').onclick=()=>d.close('no');i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();d.close('ok');}};d.onclose=()=>res(d.returnValue==='ok'?(inp?i.value:true):(inp?null:false));d.showModal();if(inp)i.focus();});}
 const say=m=>ask(m);
 /* GitHub publish */
 const GK='affsite:gh';
@@ -282,7 +284,8 @@ const fd=f=>Object.fromEntries(new FormData(f));
 function fillForm(f,o){[...f.elements].forEach(e=>{if(e.name)e.value=o[e.name]??''});f.scrollIntoView({behavior:'smooth',block:'nearest'});}
 
 async function openAdmin(){
-  if(!sessionStorage.getItem('adm')){
+  let ok=null;try{ok=sessionStorage.getItem('adm')}catch(e){}
+  if(!ok){
     if(!S.settings.passHash){
       const p=await ask('Create an admin passcode (min 6 characters):',true);
       if(!p||p.length<6){if(p)say('Passcode needs at least 6 characters.');return;}
@@ -291,16 +294,19 @@ async function openAdmin(){
       const p=await ask('Admin passcode:',true);if(!p)return;
       if(await sha(p)!==S.settings.passHash){say('Wrong passcode.');return;}
     }
-    sessionStorage.setItem('adm','1');
+    try{sessionStorage.setItem('adm','1')}catch(e){}
   }
-  renderAdmin();$('#adm').showModal();
+  try{renderAdmin();}catch(e){$('#year').textContent='Error: '+e.message;}
+  const a=$('#adm');if(!a.open)a.showModal();
 }
 
 function bind(){
   $('#year').textContent='© '+new Date().getFullYear();
   $('#q').oninput=render;$('#cat').onchange=render;
-  $('#openAdmin').onclick=openAdmin;
+  $('#openAdmin').onclick=()=>openAdmin().catch(e=>{$('#year').textContent='Error: '+e.message;});
   $('#pub').onclick=publish;
+  document.querySelectorAll('form.f').forEach(f=>{const b=f.querySelector('button[type=submit]');b&&b.addEventListener('click',e=>{e.preventDefault();if(f.reportValidity())f.onsubmit({preventDefault(){},target:f});});});
+  $('#imgf').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const k=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);$('#pf').imgdata.value=c.toDataURL('image/jpeg',.8);URL.revokeObjectURL(u);toast('Picture ready. Now click Save product.');};im.onerror=()=>toast('Could not read that picture.');im.src=u;};
   $('#gf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);ghSet({repo:d.repo.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,''),branch:(d.branch||'main').trim(),token:d.token.trim()});toast('GitHub details saved.');};
   $('#af').code.addEventListener('input',e=>{const c=e.target.value,p=$('#af').placement;if(/atOptions/.test(c)){if(p.value==='global')p.value='top';}else if(/container-/.test(c)){if(p.value==='global')p.value='feed';}else if(/<script/i.test(c))p.value='global';});
   $('#closeAdmin').onclick=()=>$('#adm').close();
@@ -308,7 +314,7 @@ function bind(){
     document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+b.dataset.t));
   });
-  $('#pf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);
+  $('#pf').onsubmit=e=>{e.preventDefault();const d=fd(e.target);if(d.imgdata)d.image=d.imgdata;delete d.imgdata;
     if(d.id){Object.assign(S.products.find(p=>p.id===d.id),d);}else{d.id=uid();S.products.unshift(d);}
     e.target.reset();e.target.id.value='';save();toast('Saved. Click "Publish to GitHub" to make it live.');};
   $('#af').onsubmit=e=>{e.preventDefault();const d=fd(e.target);
