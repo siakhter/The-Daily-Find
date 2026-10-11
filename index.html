@@ -327,7 +327,7 @@ async function openAdmin(){
 }
 
 function bind(){
-  $('#year').textContent='© '+new Date().getFullYear()+' · v4 classic layout';
+  $('#year').textContent='© '+new Date().getFullYear()+' · v6 classic layout + side ads';
   $('#q').oninput=render;$('#cat').onchange=render;
   $('#openAdmin').onclick=()=>openAdmin().catch(e=>{$('#year').textContent='Error: '+e.message;});
   $('#pub').onclick=publish;
