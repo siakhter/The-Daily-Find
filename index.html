@@ -53,6 +53,8 @@ header p{color:inherit;opacity:.9}
 .card{transition:transform .15s,box-shadow .15s}
 .card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.14)}
 .price{font-size:1.1rem;color:var(--acc)}
+.side{display:none;position:fixed;top:90px;width:170px;z-index:1;flex-direction:column;gap:12px;align-items:center}
+@media(min-width:1420px){.side{display:flex}.side.L{left:calc(50% - 706px)}.side.R{left:calc(50% + 536px)}}
 .del{color:#d64545!important;border-color:#d64545!important}
 .dh{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1}
 .tabs{display:flex;gap:6px}
@@ -70,6 +72,7 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
 </style>
 </head>
 <body>
+<aside id="ad-left" class="side L"></aside><aside id="ad-right" class="side R"></aside>
 <div class="wrap">
   <header>
     <h1 id="title">The Daily Find</h1>
@@ -128,6 +131,8 @@ textarea{min-height:110px;font-family:ui-monospace,Menlo,monospace;font-size:.82
           <option value="top">Top of page</option>
           <option value="feed">Between products</option>
           <option value="bottom">Bottom of page</option>
+          <option value="left">Left side (wide screens only, e.g. 160x600)</option>
+          <option value="right">Right side (wide screens only, e.g. 160x600)</option>
           <option value="global">Site-wide script</option>
         </select>
       </label>
@@ -289,7 +294,7 @@ function render(){
       const d=document.createElement('div');d.className='ad';d.appendChild(adFrame(feed[n++%feed.length]));g.appendChild(d);
     }
   });
-  fill($('#ad-top'),'top');fill($('#ad-bottom'),'bottom');
+  fill($('#ad-top'),'top');fill($('#ad-bottom'),'bottom');fill($('#ad-left'),'left');fill($('#ad-right'),'right');
 }
 
 /* admin */
