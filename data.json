@@ -1,5 +1,5 @@
 {
-  "updatedAt": 1791696793264,
+  "updatedAt": 1791872204968,
   "settings": {
     "title": "The Daily Find",
     "tagline": "Hand-picked products I would actually buy.",
@@ -96,6 +96,24 @@
       "name": "728 banner",
       "placement": "bottom",
       "code": "<script>\n  atOptions = {\n    'key' : '41e73a83905a7b9862852adc140174a4',\n    'format' : 'iframe',\n    'height' : 90,\n    'width' : 728,\n    'params' : {}\n  };\n</script>\n<script src=\"https://www.highrevenueformat.com/41e73a83905a7b9862852adc140174a4/invoke.js\"></script>",
+      "w": "",
+      "h": "",
+      "enabled": true
+    },
+    {
+      "id": "edejlo2",
+      "name": "ads3",
+      "placement": "right",
+      "code": "<script>\n  atOptions = {\n    'key' : '3583544eb3218c3f904b8b1dc373022b',\n    'format' : 'iframe',\n    'height' : 300,\n    'width' : 160,\n    'params' : {}\n  };\n</script>\n<script src=\"https://www.highrevenueformat.com/3583544eb3218c3f904b8b1dc373022b/invoke.js\"></script>",
+      "w": "",
+      "h": "",
+      "enabled": true
+    },
+    {
+      "id": "gsl63ut",
+      "name": "ad4",
+      "placement": "right",
+      "code": "<script>\n  atOptions = {\n    'key' : '3583544eb3218c3f904b8b1dc373022b',\n    'format' : 'iframe',\n    'height' : 300,\n    'width' : 160,\n    'params' : {}\n  };\n</script>\n<script src=\"https://www.highrevenueformat.com/3583544eb3218c3f904b8b1dc373022b/invoke.js\"></script>",
       "w": "",
       "h": "",
       "enabled": true
